@@ -1,15 +1,18 @@
 example = function() {
   library(repboxExplore)
-  project_dirs = repboxExplore::get_project_dirs("~/repbox/projects_gha")
+  library(repboxEJD)
+  project_dirs = repboxExplore::get_project_dirs("~/repbox/projects_share")
 
   pr_df = data.frame(project_dir = project_dirs, artid = tools::file_path_sans_ext(basename(project_dirs)))
 
-  zip_df = repboxEJD::ejd_list_downloaded_sup_zip()
+  #ejd_make_zip_df()
+  zip_df = repboxExplore::read_explore_rds("ejd_zip_df.Rds")
 
-  zip_df = pr_df %>% left_join(zip_df, by="artid") %>%
+  zip_df = pr_df %>%
+    left_join(zip_df, by="artid") %>%
     filter(!is.na(file))
 
-  i = 10
+  i = 1
   project_dir = zip_df$project_dir[i]
   zip_file = zip_df$file[i]
   cand_df = repbox_extract_readme_cand_from_zip(project_dir, zip_file,just_return_cand_df = !TRUE, remove_previous_files = TRUE)
@@ -21,10 +24,17 @@ example = function() {
     cat("\n",i," ", project_dir, "\n")
     try({
       res = repbox_extract_readme_cand_from_zip(project_dir, zip_file,remove_previous_files = TRUE)
-
-      repbox_readme_files_to_txt(project_dir)
     })
   }
+
+  #rem_files = list.files(paste0(zip_df$project_dir,"/readme/txt"), glob2rx("*.*"), full.names = TRUE, recursive = TRUE,include.dirs = FALSE)
+  #file.remove(rem_files)
+
+  for (i in 1:NROW(zip_df)) {
+    project_dir = zip_df$project_dir[i]
+    repbox_readme_files_to_txt(project_dir)
+  }
+
 
   for (i in 1:NROW(zip_df)) {
     project_dir = zip_df$project_dir[i]
@@ -125,4 +135,21 @@ find_readme_file_candidates = function(files, max_cand=Inf, min_score_not_best=6
   df = df[keep_rows,, drop=FALSE]
 
   df
+}
+
+
+repbox_readme_txt_files = function(project_dir) {
+  list.files(file.path(project_dir, "readme","txt"),glob2rx("*"), full.names = TRUE)
+}
+
+
+repbox_readme_txt_files = function(project_dir, full.names=FALSE) {
+  list.files(file.path(project_dir, "readme","txt"),glob2rx("*.*"), full.names = full.names, recursive = TRUE)
+}
+
+repbox_readme_txt_to_org_file_name = function(files) {
+  mfiles = tools::file_path_sans_ext(files)
+  keep_org = !stri_detect_fixed(mfiles,pattern = ".")
+  mfiles[keep_org] = files[keep_org]
+  mfiles
 }
