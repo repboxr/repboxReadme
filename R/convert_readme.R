@@ -17,7 +17,7 @@ repbox_readme_files_to_txt = function(project_dir) {
   out_dir = file.path(project_dir, "readme/txt")
   if (!dir.exists(out_dir)) dir.create(out_dir)
 
-  #file = files[2]
+  file = files[1]
   for (file in files) {
     ext = tolower(tools::file_ext(file))
     if (startsWith(file,"~$")) next
@@ -68,7 +68,7 @@ replace_wrong_pdf_txt_chars = function(txt, incorrect_char = "") {
   txt = stri_replace_all_fixed(txt, "…", "fi")
   txt = stri_replace_all_fixed(txt, "‡", "fl")
   # Also ensure that incompatible UTF-8 characters are completely removed
-  txt = iconv(text, from = "UTF-8", to = "UTF-8", sub = incorrect_char)
+  txt = iconv(txt, from = "UTF-8", to = "UTF-8", sub = incorrect_char)
   txt
 }
 
