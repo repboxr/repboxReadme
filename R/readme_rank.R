@@ -26,6 +26,32 @@ repbox_load_or_make_readme_ranks = function(project_dir, overwrite=FALSE) {
   df
 }
 
+example = function() {
+  library(repboxExplore)
+  project_dirs = get_project_dirs("~/repbox/projects_readme")
+  rx_agg_readme_ranks(project_dirs)
+}
+
+rx_agg_readme_ranks = function(project_dirs) {
+  files = file.path(project_dirs, "readme/readme_ranks.Rds")
+  files = files[file.exists(files)]
+
+  li = lapply(files, function(file) {
+    project_dir = dirname(dirname(file))
+    artid = basename(project_dir)
+    df = readRDS(file)
+    df$artid = artid; df$project_dir = project_dir
+    df
+  })
+  df = bind_rows(li)
+  names(df)
+  cols = c("artid","org_file","txt_file","rank", "score", "project_dir")
+  df = df[,cols]
+  df = rename.cols(df,c("org_file","txt_file","rank", "score"), paste0("readme_",c("org_file","txt_file","rank", "score")))
+  repboxExplore::save_explore_rds(df, "readme_rank.Rds")
+  df
+}
+
 repbox_make_readme_ranks = function(project_dir) {
   restore.point("repbox_make_readme_ranks")
   txt_files = repbox_readme_txt_files(project_dir)

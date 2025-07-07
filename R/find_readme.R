@@ -90,6 +90,8 @@ find_readme_file_candidates = function(files, max_cand=Inf, min_score_not_best=6
 
   files = files[!has.substr(files, "__MACOSX")]
   files = files[!endsWith(files, "/")]
+  files=  files[!startsWith(basename(files),"~")]
+  files=  files[!startsWith(basename(files),"._")]
 
   dir = dirname(files)
   base = basename(tolower(files))

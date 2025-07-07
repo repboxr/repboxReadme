@@ -7,6 +7,7 @@ example = function() {
 
 repbox_readme_files_to_txt = function(project_dir) {
   restore.point("repbox_readme_files_to_txt")
+  project_dir = normalizePath(project_dir,mustWork = FALSE)
   dir = file.path(project_dir, "readme/org")
   files = list.files(dir, full.names = FALSE,include.dirs = FALSE,recursive = TRUE)
   if(length(files)==0) {
@@ -14,7 +15,7 @@ repbox_readme_files_to_txt = function(project_dir) {
     return(invisible())
   }
 
-  out_dir = file.path(project_dir, "readme/txt")
+  out_dir = normalizePath(file.path(project_dir, "readme/txt"))
   if (!dir.exists(out_dir)) dir.create(out_dir)
 
   file = files[1]
@@ -40,10 +41,10 @@ repbox_readme_files_to_txt = function(project_dir) {
       restore.point("convert_doc")
       out_file = paste0(out_dir, "/", file, ".md")
       cmd = paste0('antiword "', in_file, '" > "', out_file,'"')
-      system(cmd)
+      try(system(cmd))
     } else if (ext %in% c("docx","rtf","odt")) {
       out_file = paste0(out_dir, "/", file, ".md")
-      rmarkdown::pandoc_convert(in_file, output = out_file)
+      try(rmarkdown::pandoc_convert(in_file, output = out_file))
       #text = readtext::readtext(in_file)$text
       #writeLines(text, out_file)
     } else {

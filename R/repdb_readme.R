@@ -1,3 +1,12 @@
+readme_file_to_txt_file = function(file) {
+  file = stri_replace_first_fixed(file, "readme/org/", "readme/txt/")
+  file = paste0(file, ".txt") %>%
+    stri_replace_all_fixed(".txt.txt", ".txt")
+  file
+
+
+}
+
 
 repdb_add_readme = function(project_dir) {
   restorepoint::restore.point("repdb_add_readme")
@@ -6,7 +15,7 @@ repdb_add_readme = function(project_dir) {
 
   df = readRDS(cand_file)
   df$readme_text = lapply(df$file_path, function(fp) {
-    file = paste0(project_dir, "/readme/txt/", fp,".txt")
+    file = paste0(project_dir, "/readme/txt/", readme_file_to_txt_file(fp))
     if (!file.exists(file)) return("")
     txt = paste0(readLines(file, warn=FALSE), collapse="\n")
   })
