@@ -12,7 +12,7 @@ example = function() {
 
   inds = 1:length(project_dirs)
   inds = 1
-  inds = 1701:2000
+  inds = 2901:3200
   i = inds[1]
   for (i in inds) {
     project_dir = project_dirs[i]
@@ -60,23 +60,42 @@ rx_agg_readme_ai = function() {
   library(repboxExplore)
   library(repboxAI)
   library(EconJournalScrap)
+  library(repboxExplore)
 
   parent_dir = "~/repbox/projects_readme"
   project_dirs = repboxExplore::get_project_dirs(parent_dir)
 
   arts = ejs_load_agg("art") %>% select(artid, journ, year, title)
+  ranks = repboxExplore::read_explore_rds("readme_rank.Rds")
 
-  df_ov = rai_agg_all_prod_df(project_dirs, "readme_overview") %>% left_join(arts)
-  save_explore_rds(df_ov, "fp_readme_overview.Rds")
-  rio::export(df_ov, "~/repbox/repbox_reports/fp_readme_overview.csv")
+  form_agg = function(df) {
+    agg = df %>%
+      left_join(ranks %>% rename(readme_file = readme_org_file), join_by(artid, readme_file, project_dir)) %>%
+      #filter(readme_rank == 1) %>%
+      group_by(artid) %>%
+      arrange(readme_rank) %>%
+      slice(1) %>%
+      ungroup() %>%
+      left_join(arts, by = c("artid")) %>%
+      select(artid, journ, year, everything())
+    agg
+  }
 
-  df_g = rai_agg_all_prod_df(project_dirs, "readme_vs_guide") %>% left_join(arts) %>% select(artid, journ, year, everything())
-  save_explore_rds(df_g, "fp_readme_vs_guide.Rds")
 
-  rio::export(df_g, "~/repbox/repbox_reports/fp_readme_vs_guide.csv")
+  df = rai_agg_all_prod_df(project_dirs, "readme_overview")
+  agg_ov = form_agg(df)
+
+  save_explore_rds(agg_ov, "fp_readme_overview.Rds")
+  rio::export(agg_ov, "~/repbox/repbox_reports/fp_readme_overview.csv")
+
+  df_g = rai_agg_all_prod_df(project_dirs, "readme_vs_guide")
+  agg_g = form_agg(df_g)
+  save_explore_rds(agg_g, "fp_readme_vs_guide.Rds")
+
+  rio::export(agg_g, "~/repbox/repbox_reports/fp_readme_vs_guide.csv")
 
 
-  art_df = df %>%
+  art_df = agg_ov %>%
     group_by(artid) %>%
     summarize(
       num_readme = n(),
