@@ -2,8 +2,8 @@ example = function() {
 
   library(repboxReadme)
   library(repboxAI)
-  #rgemini::set_gemini_api_key(file = "~/repbox/gemini/gemini_api_key2.txt")
-  rgemini::set_gemini_api_key(file = "~/repbox/gemini/gemini_api_key.txt")
+  rgemini::set_gemini_api_key(file = "~/repbox/gemini/gemini_api_key2.txt")
+  #rgemini::set_gemini_api_key(file = "~/repbox/gemini/gemini_api_key.txt")
   project_dirs = list.dirs("~/repbox/projects_readme", recursive=FALSE)
   rgemini::run_gemini
   txt_dirs = file.path(project_dirs, "/readme/txt")
@@ -12,10 +12,11 @@ example = function() {
 
   inds = 1:length(project_dirs)
   inds = 1
-  inds = 2901:3200
+  inds = 8001:8237
   i = inds[1]
   for (i in inds) {
     project_dir = project_dirs[i]
+    project_dir = "/home/rstudio/repbox/projects_readme/aejapp_14_4_10"
     fp_dir = file.path(project_dir, "fp")
     #if (dir.exists(fp_dir)) next
     cat("\n", i, "of", max(inds),project_dir,"\n")
@@ -34,7 +35,7 @@ example = function() {
   set_ai_opts(model = "gemini-2.5-flash-lite-preview-06-17")
   project_dirs = list.dirs("~/repbox/projects_readme", recursive=FALSE)
   #rgemini::set_gemini_api_key(file = "~/repbox/gemini/gemini_api_key.txt")
-  repbox_rerun_outages(project_dirs, steps=steps)
+  repbox_rerun_outages(rev(project_dirs), steps=steps)
 
 }
 
@@ -87,12 +88,14 @@ rx_agg_readme_ai = function() {
 
   save_explore_rds(agg_ov, "fp_readme_overview.Rds")
   rio::export(agg_ov, "~/repbox/repbox_reports/fp_readme_overview.csv")
+  rio::export(agg_ov[c(1,100,1000),], "~/repbox/repbox_reports/readme_overview_example.csv")
 
   df_g = rai_agg_all_prod_df(project_dirs, "readme_vs_guide")
   agg_g = form_agg(df_g)
   save_explore_rds(agg_g, "fp_readme_vs_guide.Rds")
 
   rio::export(agg_g, "~/repbox/repbox_reports/fp_readme_vs_guide.csv")
+  rio::export(agg_g[c(1,100,1000),], "~/repbox/repbox_reports/readme_vs_guide_example.csv")
 
 
   art_df = agg_ov %>%
